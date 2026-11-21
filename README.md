@@ -1,4 +1,4 @@
-# No Shorts
+# YouTube No Shorts
 
 YouTube for Android without Shorts. The app opens YouTube's mobile site (m.youtube.com) in a full-screen WebView and removes every Shorts surface:
 

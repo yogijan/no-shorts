@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">No Shorts</string>
+    <string name="app_name">YouTube No Shorts</string>
     <string name="offline_title">You\'re offline</string>
     <string name="offline_body">Check your internet connection and try again.</string>
     <string name="retry">Retry</string>
