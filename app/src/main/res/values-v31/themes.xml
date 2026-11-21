@@ -1,0 +1,7 @@
+<resources>
+    <!-- Android 12+ splash: page-coloured background with the app icon, held until YouTube paints. -->
+    <style name="Theme.NoShorts" parent="Base.Theme.NoShorts">
+        <item name="android:windowSplashScreenBackground">@color/background</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+    </style>
+</resources>

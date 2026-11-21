@@ -16,11 +16,13 @@ object Urls {
             h == "youtube-nocookie.com" || h.endsWith(".youtube-nocookie.com")
     }
 
-    /** YouTube itself plus the Google sign-in and consent pages it bounces through. */
+    /** YouTube itself plus the Google sign-in and consent pages it bounces through. Everything else opens in the browser. */
     fun isInApp(host: String?): Boolean {
         val h = host?.lowercase() ?: return false
-        return isYouTube(h) || h == "google.com" || h.endsWith(".google.com") || h.endsWith(".gstatic.com")
+        return isYouTube(h) || h in GOOGLE_ACCOUNT_HOSTS || h.startsWith("accounts.google.")
     }
+
+    private val GOOGLE_ACCOUNT_HOSTS = setOf("accounts.google.com", "consent.google.com", "myaccount.google.com")
 
     /**
      * If [uri] is a Shorts link (youtube.com/shorts/ID) or a youtu.be short link,

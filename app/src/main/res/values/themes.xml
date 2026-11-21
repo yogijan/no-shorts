@@ -1,11 +1,13 @@
 <resources>
-    <!-- Light theme: the WebView reports prefers-color-scheme: light, so YouTube follows it. -->
-    <style name="Theme.NoShorts" parent="android:Theme.Material.Light.NoActionBar">
+    <!-- Light: the WebView reports prefers-color-scheme: light, so YouTube follows the system setting. -->
+    <style name="Base.Theme.NoShorts" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/background</item>
         <item name="android:colorPrimary">@color/accent</item>
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">#99000000</item>
+        <item name="android:navigationBarColor">@color/background</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <style name="Theme.NoShorts" parent="Base.Theme.NoShorts" />
 </resources>

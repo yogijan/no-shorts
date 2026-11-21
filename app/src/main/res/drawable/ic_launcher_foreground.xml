@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A play button in a ring. Content sits inside the 66dp adaptive-icon safe zone. -->
+<!-- A vertical "short video" card with a "no" badge. Content sits inside the 66dp adaptive-icon safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- vertical video card -->
     <path
-        android:pathData="M54,31a23,23 0,1 1,0 46a23,23 0,1 1,0 -46z"
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,31L60,31A6,6 0,0 1,66 37L66,69A6,6 0,0 1,60 75L44,75A6,6 0,0 1,38 69L38,37A6,6 0,0 1,44 31Z" />
+    <!-- play mark -->
+    <path
+        android:fillColor="#1C1C1E"
+        android:pathData="M46,43.5L46,62.5L61,53Z" />
+    <!-- badge knockout -->
+    <path
+        android:fillColor="#1C1C1E"
+        android:pathData="M68,53A15,15 0,1 1,68 83A15,15 0,1 1,68 53Z" />
+    <!-- "no" badge -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M68,58A10,10 0,1 1,68 78A10,10 0,1 1,68 58Z"
         android:strokeWidth="4"
-        android:strokeColor="#FFFFFF"
-        android:fillColor="#00000000" />
+        android:strokeColor="#FF3B30" />
     <path
-        android:pathData="M48,43L48,65L66,54Z"
-        android:fillColor="#FFFFFF" />
+        android:pathData="M60.9,60.9L75.1,75.1"
+        android:strokeWidth="4"
+        android:strokeColor="#FF3B30" />
 </vector>

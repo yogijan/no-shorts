@@ -65,7 +65,21 @@
     'ytd-guide-entry-renderer:has(a[title="Shorts"])',
     'ytd-mini-guide-entry-renderer[aria-label="Shorts"]'
   ];
-  var CSS = HIDE.map(function (s) { return s + '{display:none!important}'; }).join('\n');
+  // App-like touch behaviour: no blue tap flashes, no text selection or link callouts on long-press.
+  var APP_FEEL = [
+    'html{-webkit-tap-highlight-color:transparent!important;-webkit-touch-callout:none}',
+    'body{-webkit-user-select:none;user-select:none}',
+    'input,textarea,[contenteditable],[contenteditable] *{-webkit-user-select:text;user-select:text}',
+    // "Open the app" / "Try Premium" bottom-sheet promos
+    'ytm-mealbar-promo-renderer{display:none!important}',
+    // Picture-in-picture: the PiP window shows only the video
+    'html.noshorts-pip,html.noshorts-pip body{overflow:hidden!important;background:#000!important}',
+    'html.noshorts-pip video{position:fixed!important;left:0!important;top:0!important;width:100vw!important;' +
+      'height:100vh!important;z-index:2147483647!important;object-fit:contain!important;background:#000!important;' +
+      'transform:none!important}',
+    'html.noshorts-pip ytm-mobile-topbar-renderer,html.noshorts-pip ytm-pivot-bar-renderer{visibility:hidden!important}'
+  ];
+  var CSS = HIDE.map(function (s) { return s + '{display:none!important}'; }).concat(APP_FEEL).join('\n');
 
   function ensureStyle() {
     if (document.getElementById('noshorts-style')) return;
@@ -128,6 +142,60 @@
     });
   }
 
+  // ---- 4. Report to the app: page colour (so the system bars match YouTube's own light/dark
+  // setting) and whether the main video is playing (keep screen on, picture-in-picture).
+  function bridge() { return window.NoShortsAndroid; }
+
+  function parseColor(str) {
+    str = (str || '').trim();
+    var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(str);
+    if (m) {
+      var h = m[1].length === 3 ? m[1].replace(/./g, '$&$&') : m[1];
+      return [0, 2, 4].map(function (i) { return parseInt(h.substr(i, 2), 16); });
+    }
+    m = /^rgba?\(([^)]+)\)$/i.exec(str);
+    if (!m) return null;
+    var p = m[1].split(/[\s,\/]+/).filter(Boolean).map(parseFloat);
+    if (p.length < 3 || p.slice(0, 3).some(isNaN)) return null;
+    if (p.length > 3 && p[3] < 0.5) return null; // transparent: not the real page colour
+    return p.slice(0, 3).map(Math.round);
+  }
+
+  var lastColor = '';
+  function reportPageColor() {
+    var b = bridge();
+    if (!b || !document.documentElement) return;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    var rgb = parseColor(getComputedStyle(document.documentElement).backgroundColor) ||
+      (document.body && parseColor(getComputedStyle(document.body).backgroundColor)) ||
+      (meta && parseColor(meta.getAttribute('content')));
+    if (!rgb || rgb.join() === lastColor) return;
+    lastColor = rgb.join();
+    b.setPageColor(rgb[0], rgb[1], rgb[2]);
+  }
+
+  // Muted previews that autoplay in feeds don't count; only the watch-page player does.
+  var lastPlaying = null;
+  function reportPlayback() {
+    var b = bridge();
+    if (!b) return;
+    var playing = location.pathname === '/watch' &&
+      Array.prototype.some.call(document.querySelectorAll('video'), function (v) {
+        return !v.paused && !v.ended && !v.muted && v.readyState > 2;
+      });
+    if (playing === lastPlaying) return;
+    lastPlaying = playing;
+    b.setPlaying(playing);
+  }
+  ['play', 'playing', 'pause', 'ended', 'emptied', 'volumechange'].forEach(function (type) {
+    document.addEventListener(type, reportPlayback, true);
+  });
+
+  function setPip(on) {
+    document.documentElement.classList.toggle('noshorts-pip', !!on);
+    if (on) window.scrollTo(0, 0);
+  }
+
   // Re-scan whenever the page changes, at most once per frame.
   var queued = false;
   function queueScan() {
@@ -136,10 +204,11 @@
     requestAnimationFrame(function () {
       queued = false;
       try { scan(); } catch (err) { /* keep the page usable if YouTube changes its markup */ }
+      try { reportPageColor(); reportPlayback(); } catch (err) { /* reporting is best-effort */ }
     });
   }
 
-  window.__noShorts = { scan: queueScan };
+  window.__noShorts = { scan: queueScan, setPip: setPip };
   ensureStyle();
   queueScan();
   new MutationObserver(queueScan).observe(document.documentElement, { childList: true, subtree: true });
