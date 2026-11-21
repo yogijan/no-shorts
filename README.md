@@ -32,6 +32,21 @@ Open the folder, wait for the Gradle sync, then use **Run ▶** with your phone 
 
 Command line (needs JDK 17+ and the Android SDK): `./gradlew assembleRelease`, which writes the APK to `app/build/outputs/apk/release/`.
 
+## Permanent signing key (one-time setup)
+
+Without this, every build gets a new random key and Android refuses to install an update over the old app. Run this once on your Mac, inside the repo folder:
+
+```bash
+PW=$(openssl rand -hex 16)
+keytool -genkeypair -keystore ~/noshorts-release.jks -alias noshorts -keyalg RSA -keysize 2048 \
+  -validity 10000 -storepass "$PW" -keypass "$PW" -dname "CN=No Shorts"
+base64 -i ~/noshorts-release.jks | gh secret set KEYSTORE_BASE64
+echo -n "$PW" | gh secret set KEYSTORE_PASSWORD
+echo "$PW"   # save this password in your password manager
+```
+
+Keep `~/noshorts-release.jks` and the password safe. Then uninstall the old app once and install the next build; from then on, updates install over each other.
+
 ## How it works
 
 | File | Role |

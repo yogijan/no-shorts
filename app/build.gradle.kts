@@ -15,12 +15,25 @@ android {
         versionName = "1.1"
     }
 
+    // A fixed signing key lets each new APK install over the previous one.
+    // CI supplies it from the KEYSTORE_BASE64 / KEYSTORE_PASSWORD repo secrets (see README);
+    // without them the build falls back to a throwaway debug key.
+    val releaseKeystore = System.getenv("KEYSTORE_FILE")
+    signingConfigs {
+        create("release") {
+            if (releaseKeystore != null) {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS") ?: "noshorts"
+                keyPassword = System.getenv("KEYSTORE_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Signed with the debug key so the release APK installs without extra setup.
-            // Swap in your own keystore before sharing it with anyone.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (releaseKeystore != null) "release" else "debug")
         }
     }
 
